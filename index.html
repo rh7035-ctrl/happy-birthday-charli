@@ -5,20 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Happy Birthday, Charli ✨</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=Lora:ital,wght@0,400;0,500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=v3">
+    <link rel="stylesheet" href="style.css?v=ghibli">
 </head>
 <body>
+    <!-- Audio Element -->
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
     <div id="universe">
         <canvas id="sky"></canvas>
         <div id="moon"></div>
         
+        <!-- Music Toggle Button (Appears after Look Up) -->
+        <button id="music-toggle" class="hidden">🎵 Unmute</button>
+
         <div id="opening-screen" class="screen">
             <h1 id="title-main" class="fade-element">Happy Birthday, Charli ✨</h1>
             <h2 id="title-sub" class="fade-element">Some memories never disappear.<br>They simply wait among the stars.</h2>
             <button id="btn-lookup" class="glow-btn fade-element">✨ Look Up</button>
         </div>
         
-        <div id="cinematic-text" class="screen hidden">
+        <!-- Instruction Text -->
+        <div id="instruction-screen" class="screen hidden pointer-none">
+            <h2 id="instruction-text" class="fade-element" style="color: var(--gold); text-shadow: 0 2px 10px rgba(0,0,0,0.5); font-size: 1.4rem;">Touch the brightest star.</h2>
+        </div>
+
+        <div id="cinematic-text" class="screen hidden pointer-none">
             <h2 id="text-display"></h2>
         </div>
         
@@ -52,13 +65,13 @@
             </div>
         </div>
 
-        <div id="credits" class="screen hidden" style="justify-content: flex-end; padding-bottom: 8vh;">
+        <div id="credits" class="screen hidden pointer-none" style="justify-content: flex-end; padding-bottom: 8vh;">
             <p class="center-text" style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 10px;">Made with love.<br>Happy Birthday. ✨</p>
-            <p id="moon-hint" class="hidden" style="font-size: 0.85rem; color: var(--gold); font-style: italic; margin-bottom: 5px; text-align: center; transition: opacity 2s ease;">Perhaps the moon holds one last secret...</p>
-            <button id="btn-replay" class="glow-btn glass-btn mt-4">Experience Again</button>
+            <p id="moon-hint" class="fade-element" style="font-size: 0.9rem; color: var(--gold); font-style: italic; margin-bottom: 5px; text-align: center;">Perhaps the moon holds one last secret...</p>
+            <button id="btn-replay" class="glow-btn glass-btn mt-4 pointer-auto">Experience Again</button>
         </div>
     </div>
 
-    <script src="script.js?v=v3"></script>
+    <script src="script.js?v=ghibli"></script>
 </body>
 </html>
