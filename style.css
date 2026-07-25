@@ -169,4 +169,3 @@ p { font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.2rem; text-align: cen
 @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition-duration: 0.4s !important; }
 }
-
