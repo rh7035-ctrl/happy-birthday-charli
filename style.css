@@ -29,7 +29,6 @@ canvas.blurred { filter: blur(8px) brightness(0.6); }
 #moon { position: absolute; top: 15%; right: 15%; width: 60px; height: 60px; background: #fffcee; border-radius: 50%; box-shadow: 0 0 40px 10px rgba(255, 252, 238, 0.2); z-index: 2; opacity: 0; transition: opacity 3s ease, box-shadow 3s ease, transform 0.3s ease; cursor: pointer; }
 #moon.glowing { box-shadow: 0 0 60px 20px rgba(255, 252, 238, 0.4); }
 
-/* This animation draws attention to the moon for the secret */
 @keyframes moonHintPulse {
     0%, 100% { box-shadow: 0 0 60px 20px rgba(255, 252, 238, 0.4); transform: scale(1); }
     50% { box-shadow: 0 0 80px 30px rgba(249, 229, 161, 0.6); transform: scale(1.05); }
