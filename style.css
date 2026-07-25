@@ -29,9 +29,15 @@ canvas.blurred { filter: blur(8px) brightness(0.6); }
 #moon { position: absolute; top: 15%; right: 15%; width: 60px; height: 60px; background: #fffcee; border-radius: 50%; box-shadow: 0 0 40px 10px rgba(255, 252, 238, 0.2); z-index: 2; opacity: 0; transition: opacity 3s ease, box-shadow 3s ease, transform 0.3s ease; cursor: pointer; }
 #moon.glowing { box-shadow: 0 0 60px 20px rgba(255, 252, 238, 0.4); }
 
+/* This animation draws attention to the moon for the secret */
+@keyframes moonHintPulse {
+    0%, 100% { box-shadow: 0 0 60px 20px rgba(255, 252, 238, 0.4); transform: scale(1); }
+    50% { box-shadow: 0 0 80px 30px rgba(249, 229, 161, 0.6); transform: scale(1.05); }
+}
+#moon.hint-active { animation: moonHintPulse 3s infinite ease-in-out; }
+
 .screen, #memory-overlay, #secret-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; transition: opacity 0.8s ease, visibility 0.8s; padding: 20px; }
 
-/* Critical Mobile Fix: Completely removes invisible layers from touching your screen */
 .hidden { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
 
 h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 400; text-align: center; margin-bottom: 1rem; }
@@ -43,7 +49,7 @@ p { font-size: 1rem; line-height: 1.8; margin-bottom: 1.2rem; text-align: left; 
 .fade-element { opacity: 0; transition: opacity 2.5s ease; }
 .fade-in { opacity: 1 !important; pointer-events: auto; }
 
-.glow-btn { background: transparent; color: var(--text-primary); font-family: 'Lora', serif; font-size: 1.1rem; border: 1px solid var(--glass-border); padding: 12px 30px; border-radius: 30px; cursor: pointer; margin-top: 3rem; transition: all 0.4s ease; animation: breathe 3s infinite ease-in-out; z-index: 50; position: relative; pointer-events: auto; }
+.glow-btn { background: transparent; color: var(--text-primary); font-family: 'Lora', serif; font-size: 1.1rem; border: 1px solid var(--glass-border); padding: 12px 30px; border-radius: 30px; cursor: pointer; margin-top: 1.5rem; transition: all 0.4s ease; animation: breathe 3s infinite ease-in-out; z-index: 50; position: relative; pointer-events: auto; }
 .glow-btn:active { transform: scale(0.95); }
 .glass-btn { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); animation: none; margin-top: 1.5rem; }
 
