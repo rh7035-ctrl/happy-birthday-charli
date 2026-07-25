@@ -1,4 +1,3 @@
-// Wait for everything to load so mobile Chrome doesn't freeze
 window.addEventListener('load', () => {
     
     const memories = [
@@ -30,10 +29,20 @@ window.addEventListener('load', () => {
     let width, height;
     let backgroundStars = [], fireflies = [], memoryStars = [];
 
+    // The Perfect "C" Shape Coordinates
     const starPositions = [
-        {x: 0.15, y: 0.30}, {x: 0.35, y: 0.20}, {x: 0.55, y: 0.25}, {x: 0.75, y: 0.15},
-        {x: 0.85, y: 0.40}, {x: 0.65, y: 0.50}, {x: 0.45, y: 0.60}, {x: 0.25, y: 0.55},
-        {x: 0.15, y: 0.75}, {x: 0.35, y: 0.85}, {x: 0.60, y: 0.80}, {x: 0.80, y: 0.70}
+        {x: 0.75, y: 0.25}, // 1 Top Right
+        {x: 0.55, y: 0.18}, // 2
+        {x: 0.35, y: 0.22}, // 3
+        {x: 0.22, y: 0.32}, // 4
+        {x: 0.15, y: 0.45}, // 5 Middle left curve
+        {x: 0.15, y: 0.60}, // 6 Middle left curve lower
+        {x: 0.22, y: 0.72}, // 7
+        {x: 0.35, y: 0.82}, // 8
+        {x: 0.55, y: 0.85}, // 9
+        {x: 0.72, y: 0.80}, // 10
+        {x: 0.85, y: 0.70}, // 11 Bottom right edge
+        {x: 0.80, y: 0.58}  // 12 Slight curl upwards to finish the C
     ];
 
     function resize() {
@@ -79,14 +88,14 @@ window.addEventListener('load', () => {
         }
         updatePos() { this.x = this.px * width; this.y = this.py * height; }
         draw() {
-            if(this.state === 'hidden') return;
-            let s = 2, a = 0.8;
+            // FIX: Stars are now faintly visible from the start so she can see them
+            let s = 2, a = 0.3, glow = 0;
             
             if (this.index > 0 && this.state === 'completed') {
                 let prev = memoryStars[this.index - 1];
                 if (prev.state === 'completed') {
                     ctx.strokeStyle = `rgba(249, 229, 161, ${0.4 * prev.line})`;
-                    ctx.lineWidth = 1.5;
+                    ctx.lineWidth = 2;
                     ctx.beginPath(); ctx.moveTo(prev.x, prev.y);
                     ctx.lineTo(prev.x + (this.x - prev.x)*prev.line, prev.y + (this.y - prev.y)*prev.line);
                     ctx.stroke();
@@ -96,14 +105,20 @@ window.addEventListener('load', () => {
 
             if(this.state === 'active') {
                 this.pulse += 0.05;
-                s += Math.sin(this.pulse) * 1.5;
+                s = 5 + Math.sin(this.pulse) * 2; // Huge pulsing beacon to guide her
                 a = 1;
+                glow = 15;
             } else if(this.state === 'completed') {
-                s = 3;
+                s = 4;
+                a = 0.9;
+                glow = 5;
             }
             
             ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
+            ctx.shadowBlur = glow;
+            ctx.shadowColor = 'rgba(249, 229, 161, 0.8)';
             ctx.beginPath(); ctx.arc(this.x, this.y, s, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0; // Reset
         }
     }
 
@@ -144,7 +159,7 @@ window.addEventListener('load', () => {
         }, 2000);
     });
 
-    // Touch logic fixed for mobile exact coordinates
+    // Touch logic fixed with massive hitbox
     function handleStarTouch(clientX, clientY) {
         if(!interactable) return;
         let active = memoryStars[currentMemoryIndex];
@@ -155,8 +170,8 @@ window.addEventListener('load', () => {
         let dy = (clientY - rect.top) - active.y;
         let dist = Math.sqrt(dx*dx + dy*dy);
         
-        // Huge hitbox for mobile fingers
-        if(dist < 80) {
+        // Massive 100px hitbox for easy tapping
+        if(dist < 100) {
             interactable = false;
             canvas.classList.add('blurred');
             let mem = memories[currentMemoryIndex];
@@ -188,7 +203,7 @@ window.addEventListener('load', () => {
                 cinematicText.classList.remove('hidden');
                 setTimeout(() => { cinematicText.classList.add('hidden'); advanceStar(); }, 3000);
             } else if(currentMemoryIndex === 10) {
-                isConstellationComplete = true;
+                isConstellationComplete = true; // Triggers the lines drawing
                 setTimeout(() => {
                     document.getElementById('text-display').innerText = "Some people become part of the sky we carry with us.";
                     cinematicText.classList.remove('hidden');
@@ -211,7 +226,19 @@ window.addEventListener('load', () => {
         memoryOverlay.classList.add('hidden');
         canvas.classList.remove('blurred');
         memoryStars[currentMemoryIndex].state = 'completed';
-        setTimeout(() => document.getElementById('credits').classList.remove('hidden'), 3000);
+        
+        setTimeout(() => {
+            document.getElementById('credits').classList.remove('hidden');
+            
+            // Wait 5 seconds, then reveal the hint for the moon
+            setTimeout(() => {
+                moon.classList.add('hint-active');
+                const hintText = document.getElementById('moon-hint');
+                hintText.classList.remove('hidden');
+                hintText.style.opacity = '1';
+            }, 5000);
+            
+        }, 3000);
     });
 
     document.getElementById('btn-replay').addEventListener('click', () => location.reload());
