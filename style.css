@@ -1,0 +1,172 @@
+:root {
+    --bg-deep: #050a15;
+    --bg-horizon: #0a1128;
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --gold: #f9e5a1;
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --font-title: 'Playfair Display', serif;
+    --font-body: 'Lora', serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: radial-gradient(circle at bottom, var(--bg-horizon) 0%, var(--bg-deep) 100%);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    touch-action: none; /* Prevent scroll/bounce on mobile */
+}
+
+#universe {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    transition: filter 1s ease;
+}
+
+canvas.blurred {
+    filter: blur(8px) brightness(0.6);
+}
+
+#moon {
+    position: absolute;
+    top: 15%; right: 15%;
+    width: 60px; height: 60px;
+    background: #fffcee;
+    border-radius: 50%;
+    box-shadow: 0 0 40px 10px rgba(255, 252, 238, 0.2);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 3s ease, box-shadow 3s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+#moon.glowing {
+    box-shadow: 0 0 60px 20px rgba(255, 252, 238, 0.4);
+}
+
+.screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: opacity 2s ease;
+}
+
+.pointer-none { pointer-events: none; }
+.pointer-auto { pointer-events: auto; }
+.hidden { opacity: 0 !important; pointer-events: none !important; }
+
+/* Typography */
+h1 { font-family: var(--font-title); font-size: 2.2rem; font-weight: 400; text-align: center; margin-bottom: 1.5rem; letter-spacing: 1px; }
+h2 { font-family: var(--font-title); font-size: 1.2rem; font-weight: 400; text-align: center; color: var(--text-secondary); line-height: 1.6; }
+h3 { font-family: var(--font-title); font-size: 1.8rem; font-weight: 400; text-align: center; margin-bottom: 1.5rem; color: var(--gold); }
+p { font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.2rem; text-align: center; color: var(--text-primary); }
+.center-text { text-align: center; }
+
+/* Intro Elements */
+.fade-element { opacity: 0; transition: opacity 2.5s ease; }
+.fade-in { opacity: 1; }
+
+/* Buttons */
+.glow-btn {
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    border: 1px solid var(--glass-border);
+    padding: 12px 30px;
+    border-radius: 30px;
+    cursor: pointer;
+    margin-top: 3rem;
+    transition: all 0.4s ease;
+    animation: breathe 3s infinite ease-in-out;
+}
+
+.glow-btn:active { transform: scale(0.95); }
+.glass-btn { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); animation: none; margin-top: 1.5rem; }
+.glass-btn:hover { background: rgba(255,255,255,0.1); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+
+/* Overlays & Cards */
+#memory-overlay, #secret-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 20;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+}
+
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    padding: 2.5rem 2rem;
+    width: 90%; max-width: 500px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    transform: translateY(20px);
+    transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Scrollbar hiding for elegant look */
+.glass-card::-webkit-scrollbar, .paper-card::-webkit-scrollbar { display: none; }
+.glass-card, .paper-card { -ms-overflow-style: none; scrollbar-width: none; }
+
+#memory-overlay.hidden .glass-card {
+    transform: translateY(40px);
+}
+
+/* Secret Paper Card */
+.paper-card {
+    background: #f4efd3; /* Aged paper */
+    color: #333;
+    border-radius: 10px;
+    padding: 2.5rem 2rem;
+    width: 90%; max-width: 500px;
+    box-shadow: 0 20px 60px rgba(255,252,238,0.15);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.paper-card p { color: #444; font-size: 1rem; text-align: left; line-height: 1.7; }
+.paper-card h3 { color: #222; }
+.dark-text { color: #222; border-color: #aaa; }
+
+/* Final Credits */
+#credits {
+    justify-content: flex-end;
+    padding-bottom: 10vh;
+}
+#credits p { font-size: 0.9rem; color: var(--text-secondary); opacity: 0.7; margin-bottom: 0; }
+.mt-4 { margin-top: 1rem; }
+
+/* Animations */
+@keyframes breathe {
+    0%, 100% { box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+    50% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition-duration: 0.4s !important; }
+}
+
