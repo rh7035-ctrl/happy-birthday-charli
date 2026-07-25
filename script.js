@@ -19,30 +19,40 @@ window.addEventListener('load', () => {
     let isConstellationComplete = false;
     let interactable = false;
     
+    // Audio Setup
+    const bgMusic = document.getElementById('bg-music');
+    bgMusic.volume = 0.3; // Gentle, soothing volume
+    const musicToggle = document.getElementById('music-toggle');
+    let isMusicPlaying = false;
+
+    musicToggle.addEventListener('click', () => {
+        if (isMusicPlaying) {
+            bgMusic.pause();
+            musicToggle.innerText = '🔇 Muted';
+            isMusicPlaying = false;
+        } else {
+            bgMusic.play();
+            musicToggle.innerText = '🎵 Playing';
+            isMusicPlaying = true;
+        }
+    });
+    
     const canvas = document.getElementById('sky');
     const ctx = canvas.getContext('2d');
     const moon = document.getElementById('moon');
     const openingScreen = document.getElementById('opening-screen');
+    const instructionScreen = document.getElementById('instruction-screen');
+    const instructionText = document.getElementById('instruction-text');
     const memoryOverlay = document.getElementById('memory-overlay');
     const cinematicText = document.getElementById('cinematic-text');
     
     let width, height;
-    let backgroundStars = [], fireflies = [], memoryStars = [];
+    let backgroundStars = [], fireflies = [], memoryStars = [], clouds = [];
 
-    // The Perfect "C" Shape Coordinates
     const starPositions = [
-        {x: 0.75, y: 0.25}, // 1 Top Right
-        {x: 0.55, y: 0.18}, // 2
-        {x: 0.35, y: 0.22}, // 3
-        {x: 0.22, y: 0.32}, // 4
-        {x: 0.15, y: 0.45}, // 5 Middle left curve
-        {x: 0.15, y: 0.60}, // 6 Middle left curve lower
-        {x: 0.22, y: 0.72}, // 7
-        {x: 0.35, y: 0.82}, // 8
-        {x: 0.55, y: 0.85}, // 9
-        {x: 0.72, y: 0.80}, // 10
-        {x: 0.85, y: 0.70}, // 11 Bottom right edge
-        {x: 0.80, y: 0.58}  // 12 Slight curl upwards to finish the C
+        {x: 0.75, y: 0.25}, {x: 0.55, y: 0.18}, {x: 0.35, y: 0.22}, {x: 0.22, y: 0.32},
+        {x: 0.15, y: 0.45}, {x: 0.15, y: 0.60}, {x: 0.22, y: 0.72}, {x: 0.35, y: 0.82},
+        {x: 0.55, y: 0.85}, {x: 0.72, y: 0.80}, {x: 0.85, y: 0.70}, {x: 0.80, y: 0.58}
     ];
 
     function resize() {
@@ -51,6 +61,28 @@ window.addEventListener('load', () => {
         memoryStars.forEach(s => s.updatePos());
     }
     window.addEventListener('resize', resize);
+
+    // Ghibli Painted Clouds
+    class PaintedCloud {
+        constructor() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * (height * 0.6);
+            this.size = Math.random() * 150 + 100;
+            this.speed = Math.random() * 0.1 + 0.05;
+            this.opacity = Math.random() * 0.03 + 0.01;
+        }
+        draw() {
+            this.x += this.speed;
+            if (this.x > width + this.size) this.x = -this.size;
+            
+            let gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+            gradient.addColorStop(0, `rgba(255, 255, 255, ${this.opacity})`);
+            gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+        }
+    }
 
     class bgStar {
         constructor() {
@@ -69,14 +101,14 @@ window.addEventListener('load', () => {
         constructor() {
             this.x = Math.random() * window.innerWidth;
             this.y = Math.random() * window.innerHeight;
-            this.size = Math.random() * 2 + 1;
+            this.size = Math.random() * 2.5 + 1; // Slightly larger for Ghibli feel
             this.life = Math.random() * 10;
         }
         draw() {
-            this.y -= 0.2;
+            this.y -= 0.15;
             if (this.y < -10) this.y = height + 10;
             this.life += 0.02;
-            ctx.fillStyle = `rgba(249, 229, 161, ${(Math.sin(this.life)+1)/2 * 0.6})`;
+            ctx.fillStyle = `rgba(238, 245, 154, ${(Math.sin(this.life)+1)/2 * 0.7})`; // Warmer green/yellow
             ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
         }
     }
@@ -87,22 +119,20 @@ window.addEventListener('load', () => {
             this.state = 'hidden'; 
             this.pulse = 0; 
             this.line = 0;
-            this.introProgress = 0; // Controls the slow pop up effect
-            this.updatePos(); // This fixes the vanishing bug!
+            this.introProgress = 0; 
+            this.updatePos(); 
         }
         updatePos() { this.x = this.px * width; this.y = this.py * height; }
         
         draw() {
-            // If hidden, don't draw it at all!
             if(this.state === 'hidden') return;
             
             let s = 0, a = 0, glow = 0;
             
-            // Draw the lines for the constellation
             if (this.index > 0 && this.state === 'completed') {
                 let prev = memoryStars[this.index - 1];
                 if (prev.state === 'completed') {
-                    ctx.strokeStyle = `rgba(249, 229, 161, ${0.4 * prev.line})`;
+                    ctx.strokeStyle = `rgba(253, 228, 147, ${0.5 * prev.line})`;
                     ctx.lineWidth = 2;
                     ctx.beginPath(); ctx.moveTo(prev.x, prev.y);
                     ctx.lineTo(prev.x + (this.x - prev.x)*prev.line, prev.y + (this.y - prev.y)*prev.line);
@@ -111,17 +141,14 @@ window.addEventListener('load', () => {
                 }
             }
 
-            // Slowly fade in and grow if active
             if(this.state === 'active') {
-                if(this.introProgress < 1) {
-                    this.introProgress += 0.01; // The speed of the slow fade-in
-                }
+                if(this.introProgress < 1) this.introProgress += 0.01;
                 this.pulse += 0.05;
                 
                 let targetSize = 6 + Math.sin(this.pulse) * 2;
                 s = targetSize * this.introProgress;
                 a = this.introProgress;
-                glow = 15 * this.introProgress;
+                glow = 20 * this.introProgress; // Stronger glow
             } else if(this.state === 'completed') {
                 s = 4;
                 a = 0.9;
@@ -130,7 +157,7 @@ window.addEventListener('load', () => {
             
             ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
             ctx.shadowBlur = glow;
-            ctx.shadowColor = 'rgba(249, 229, 161, 0.8)';
+            ctx.shadowColor = 'rgba(253, 228, 147, 0.9)'; // Golden Ghibli glow
             ctx.beginPath(); ctx.arc(this.x, this.y, s, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
         }
@@ -140,6 +167,7 @@ window.addEventListener('load', () => {
         resize();
         for(let i=0; i<60; i++) backgroundStars.push(new bgStar());
         for(let i=0; i<15; i++) fireflies.push(new Firefly());
+        for(let i=0; i<6; i++) clouds.push(new PaintedCloud());
         starPositions.forEach((p, i) => memoryStars.push(new MemStar(i, p.x, p.y)));
         
         animate();
@@ -155,6 +183,7 @@ window.addEventListener('load', () => {
     function animate() {
         ctx.clearRect(0, 0, width, height);
         backgroundStars.forEach(s => s.draw());
+        clouds.forEach(c => c.draw());
         memoryStars.forEach(s => s.draw());
         fireflies.forEach(f => f.draw());
         requestAnimationFrame(animate);
@@ -165,9 +194,31 @@ window.addEventListener('load', () => {
         openingScreen.classList.remove('fade-in');
         openingScreen.style.opacity = '0';
         moon.classList.add('glowing');
+        
+        // Start Audio and show toggle button
+        bgMusic.play().then(() => {
+            isMusicPlaying = true;
+            musicToggle.innerText = '🎵 Playing';
+        }).catch(() => {
+            // Browsers block autoplay sometimes, so it gracefully defaults to muted
+            isMusicPlaying = false;
+            musicToggle.innerText = '🔇 Muted';
+        });
+        musicToggle.classList.remove('hidden');
+
         setTimeout(() => {
             openingScreen.classList.add('hidden');
-            memoryStars[0].state = 'active'; // First star begins fading in
+            memoryStars[0].state = 'active'; 
+            
+            // Show instruction to tap brightest star
+            instructionScreen.classList.remove('hidden');
+            instructionText.classList.add('fade-in');
+            
+            setTimeout(() => {
+                instructionText.classList.remove('fade-in');
+                setTimeout(() => instructionScreen.classList.add('hidden'), 2000);
+            }, 4000);
+            
             interactable = true;
         }, 2000);
     });
@@ -176,8 +227,6 @@ window.addEventListener('load', () => {
         if(!interactable) return;
         let active = memoryStars[currentMemoryIndex];
         if(!active || active.state !== 'active') return;
-        
-        // Don't allow click until it has faded in enough to be seen
         if(active.introProgress < 0.5) return;
         
         const rect = canvas.getBoundingClientRect();
@@ -185,7 +234,6 @@ window.addEventListener('load', () => {
         let dy = (clientY - rect.top) - active.y;
         let dist = Math.sqrt(dx*dx + dy*dy);
         
-        // Massive 100px hitbox for easy tapping
         if(dist < 100) {
             interactable = false;
             canvas.classList.add('blurred');
@@ -217,7 +265,7 @@ window.addEventListener('load', () => {
                 cinematicText.classList.remove('hidden');
                 setTimeout(() => { cinematicText.classList.add('hidden'); advanceStar(); }, 3000);
             } else if(currentMemoryIndex === 10) {
-                isConstellationComplete = true; // Triggers the C shape lines drawing
+                isConstellationComplete = true; 
                 setTimeout(() => {
                     document.getElementById('text-display').innerText = "Some people become part of the sky we carry with us.";
                     cinematicText.classList.remove('hidden');
@@ -231,7 +279,7 @@ window.addEventListener('load', () => {
 
     function advanceStar() {
         currentMemoryIndex++;
-        memoryStars[currentMemoryIndex].state = 'active'; // Next star begins fading in
+        memoryStars[currentMemoryIndex].state = 'active'; 
         interactable = true;
     }
 
@@ -243,12 +291,10 @@ window.addEventListener('load', () => {
         setTimeout(() => {
             document.getElementById('credits').classList.remove('hidden');
             
-            // Wait 5 seconds, then reveal the hint for the moon
+            // THE FIX: Explicitly adding the fade-in class to the text
             setTimeout(() => {
                 moon.classList.add('hint-active');
-                const hintText = document.getElementById('moon-hint');
-                hintText.classList.remove('hidden');
-                hintText.style.opacity = '1';
+                document.getElementById('moon-hint').classList.add('fade-in');
             }, 5000);
             
         }, 3000);
@@ -256,7 +302,6 @@ window.addEventListener('load', () => {
 
     document.getElementById('btn-replay').addEventListener('click', () => location.reload());
 
-    // MOON SECRET
     let moonClicks = 0, moonTimer;
     moon.addEventListener('click', () => {
         moonClicks++;
@@ -277,6 +322,5 @@ window.addEventListener('load', () => {
         setTimeout(() => { interactable = true; }, 500);
     });
 
-    // START
     init();
 });
