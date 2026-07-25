@@ -84,13 +84,21 @@ window.addEventListener('load', () => {
     class MemStar {
         constructor(i, px, py) {
             this.index = i; this.px = px; this.py = py;
-            this.state = 'hidden'; this.pulse = 0; this.line = 0;
+            this.state = 'hidden'; 
+            this.pulse = 0; 
+            this.line = 0;
+            this.introProgress = 0; // Controls the slow pop up effect
+            this.updatePos(); // This fixes the vanishing bug!
         }
         updatePos() { this.x = this.px * width; this.y = this.py * height; }
+        
         draw() {
-            // FIX: Stars are now faintly visible from the start so she can see them
-            let s = 2, a = 0.3, glow = 0;
+            // If hidden, don't draw it at all!
+            if(this.state === 'hidden') return;
             
+            let s = 0, a = 0, glow = 0;
+            
+            // Draw the lines for the constellation
             if (this.index > 0 && this.state === 'completed') {
                 let prev = memoryStars[this.index - 1];
                 if (prev.state === 'completed') {
@@ -103,11 +111,17 @@ window.addEventListener('load', () => {
                 }
             }
 
+            // Slowly fade in and grow if active
             if(this.state === 'active') {
+                if(this.introProgress < 1) {
+                    this.introProgress += 0.01; // The speed of the slow fade-in
+                }
                 this.pulse += 0.05;
-                s = 5 + Math.sin(this.pulse) * 2; // Huge pulsing beacon to guide her
-                a = 1;
-                glow = 15;
+                
+                let targetSize = 6 + Math.sin(this.pulse) * 2;
+                s = targetSize * this.introProgress;
+                a = this.introProgress;
+                glow = 15 * this.introProgress;
             } else if(this.state === 'completed') {
                 s = 4;
                 a = 0.9;
@@ -118,7 +132,7 @@ window.addEventListener('load', () => {
             ctx.shadowBlur = glow;
             ctx.shadowColor = 'rgba(249, 229, 161, 0.8)';
             ctx.beginPath(); ctx.arc(this.x, this.y, s, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 0; // Reset
+            ctx.shadowBlur = 0;
         }
     }
 
@@ -146,7 +160,6 @@ window.addEventListener('load', () => {
         requestAnimationFrame(animate);
     }
 
-    // BUTTON: Look Up
     document.getElementById('btn-lookup').addEventListener('click', (e) => {
         e.preventDefault();
         openingScreen.classList.remove('fade-in');
@@ -154,16 +167,18 @@ window.addEventListener('load', () => {
         moon.classList.add('glowing');
         setTimeout(() => {
             openingScreen.classList.add('hidden');
-            memoryStars[0].state = 'active';
+            memoryStars[0].state = 'active'; // First star begins fading in
             interactable = true;
         }, 2000);
     });
 
-    // Touch logic fixed with massive hitbox
     function handleStarTouch(clientX, clientY) {
         if(!interactable) return;
         let active = memoryStars[currentMemoryIndex];
         if(!active || active.state !== 'active') return;
+        
+        // Don't allow click until it has faded in enough to be seen
+        if(active.introProgress < 0.5) return;
         
         const rect = canvas.getBoundingClientRect();
         let dx = (clientX - rect.left) - active.x;
@@ -191,7 +206,6 @@ window.addEventListener('load', () => {
 
     canvas.addEventListener('click', (e) => handleStarTouch(e.clientX, e.clientY));
 
-    // BUTTON: Continue
     document.getElementById('btn-continue').addEventListener('click', () => {
         memoryOverlay.classList.add('hidden');
         canvas.classList.remove('blurred');
@@ -203,7 +217,7 @@ window.addEventListener('load', () => {
                 cinematicText.classList.remove('hidden');
                 setTimeout(() => { cinematicText.classList.add('hidden'); advanceStar(); }, 3000);
             } else if(currentMemoryIndex === 10) {
-                isConstellationComplete = true; // Triggers the lines drawing
+                isConstellationComplete = true; // Triggers the C shape lines drawing
                 setTimeout(() => {
                     document.getElementById('text-display').innerText = "Some people become part of the sky we carry with us.";
                     cinematicText.classList.remove('hidden');
@@ -217,11 +231,10 @@ window.addEventListener('load', () => {
 
     function advanceStar() {
         currentMemoryIndex++;
-        memoryStars[currentMemoryIndex].state = 'active';
+        memoryStars[currentMemoryIndex].state = 'active'; // Next star begins fading in
         interactable = true;
     }
 
-    // BUTTON: Finish
     document.getElementById('btn-finish').addEventListener('click', () => {
         memoryOverlay.classList.add('hidden');
         canvas.classList.remove('blurred');
