@@ -6,19 +6,156 @@
     <title>Happy Birthday, Charli ✨</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Elegant Serif for titles, clean Sans-Serif for readability -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        :root {
+            --bg-deep: #050a15;
+            --bg-horizon: #0a1128;
+            --text-primary: rgba(255, 255, 255, 0.95);
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --gold: #f9e5a1;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --font-title: 'Playfair Display', serif;
+            --font-body: 'Lora', serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: radial-gradient(circle at bottom, var(--bg-horizon) 0%, var(--bg-deep) 100%);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            touch-action: none;
+        }
+
+        #universe { position: relative; width: 100%; height: 100%; }
+
+        canvas {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            transition: filter 1s ease;
+        }
+
+        canvas.blurred { filter: blur(8px) brightness(0.6); }
+
+        #moon {
+            position: absolute; top: 15%; right: 15%;
+            width: 60px; height: 60px;
+            background: #fffcee;
+            border-radius: 50%;
+            box-shadow: 0 0 40px 10px rgba(255, 252, 238, 0.2);
+            z-index: 2;
+            opacity: 1;
+            transition: opacity 3s ease, box-shadow 3s ease, transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        #moon.glowing { box-shadow: 0 0 60px 20px rgba(255, 252, 238, 0.4); }
+
+        .screen {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            z-index: 10;
+            transition: opacity 2s ease;
+        }
+
+        .pointer-none { pointer-events: none; }
+        .pointer-auto { pointer-events: auto; }
+        .hidden { opacity: 0 !important; pointer-events: none !important; }
+
+        h1 { font-family: var(--font-title); font-size: 2.2rem; font-weight: 400; text-align: center; margin-bottom: 1.5rem; letter-spacing: 1px; }
+        h2 { font-family: var(--font-title); font-size: 1.2rem; font-weight: 400; text-align: center; color: var(--text-secondary); line-height: 1.6; padding: 0 20px; }
+        h3 { font-family: var(--font-title); font-size: 1.8rem; font-weight: 400; text-align: center; margin-bottom: 1.5rem; color: var(--gold); }
+        p { font-size: 1.05rem; line-height: 1.8; margin-bottom: 1.2rem; text-align: center; color: var(--text-primary); }
+        .center-text { text-align: center; }
+
+        .fade-element { opacity: 1; transition: opacity 2.5s ease; }
+        .fade-in { opacity: 1; }
+
+        .glow-btn {
+            background: transparent;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            border: 1px solid var(--glass-border);
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 3rem;
+            transition: all 0.4s ease;
+            animation: breathe 3s infinite ease-in-out;
+        }
+
+        .glow-btn:active { transform: scale(0.95); }
+        .glass-btn { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); animation: none; margin-top: 1.5rem; }
+        .glass-btn:hover { background: rgba(255,255,255,0.1); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+
+        #memory-overlay, #secret-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 20; opacity: 1; transition: opacity 0.8s ease;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 2.5rem 2rem;
+            width: 90%; max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            max-height: 80vh; overflow-y: auto;
+        }
+
+        .glass-card::-webkit-scrollbar, .paper-card::-webkit-scrollbar { display: none; }
+        .glass-card, .paper-card { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #memory-overlay.hidden .glass-card { transform: translateY(40px); }
+
+        .paper-card {
+            background: #f4efd3;
+            color: #333;
+            border-radius: 10px;
+            padding: 2.5rem 2rem;
+            width: 90%; max-width: 500px;
+            box-shadow: 0 20px 60px rgba(255,252,238,0.15);
+            max-height: 85vh; overflow-y: auto;
+        }
+
+        .paper-card p { color: #444; font-size: 1rem; text-align: left; line-height: 1.7; }
+        .paper-card h3 { color: #222; }
+        .dark-text { color: #222; border-color: #aaa; }
+
+        #credits { justify-content: flex-end; padding-bottom: 10vh; }
+        #credits p { font-size: 0.9rem; color: var(--text-secondary); opacity: 0.7; margin-bottom: 0; }
+        .mt-4 { margin-top: 1rem; }
+
+        @keyframes breathe {
+            0%, 100% { box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+            50% { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition-duration: 0.4s !important; }
+        }
+    </style>
 </head>
 <body>
     <div id="universe">
-        <!-- Interactive Canvas for Stars, Fireflies, and Constellation -->
         <canvas id="sky"></canvas>
-        
-        <!-- The Moon (Double functions as the Easter Egg trigger) -->
         <div id="moon"></div>
 
-        <!-- Opening Sequence -->
         <div id="opening-screen" class="screen">
             <div class="titles">
                 <h1 id="title-main" class="fade-element">Happy Birthday, Charli ✨</h1>
@@ -27,12 +164,10 @@
             <button id="btn-lookup" class="glow-btn fade-element">✨ Look Up</button>
         </div>
 
-        <!-- Midway & Final Cinematic Text -->
         <div id="cinematic-text" class="screen pointer-none hidden">
             <h2 id="text-display"></h2>
         </div>
 
-        <!-- Memory Card Container -->
         <div id="memory-overlay" class="hidden">
             <div id="memory-card" class="glass-card">
                 <h3 id="memory-title">⭐ Title</h3>
@@ -42,7 +177,6 @@
             </div>
         </div>
 
-        <!-- Secret Easter Egg -->
         <div id="secret-overlay" class="hidden">
             <div class="paper-card">
                 <h3>🌙 A Little Secret</h3>
@@ -62,14 +196,134 @@
             </div>
         </div>
 
-        <!-- Final Credits -->
         <div id="credits" class="screen pointer-none hidden">
             <p>Made with love.<br>Happy Birthday. ✨</p>
             <button id="btn-replay" class="glow-btn glass-btn pointer-auto mt-4">Experience Again</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const memories = [
+                {
+                    title: "Kindness",
+                    text: "<p>Before I met you, I thought kindness simply meant being nice.</p><p>Then I met you.</p><p>You showed me that kindness is patience when someone is struggling.</p><p>It is understanding without judgement.<br>It is forgiving without keeping score.<br>It is caring about another person's happiness as much as your own.</p><p>You taught me that kindness isn't weakness.<br>It is one of the greatest strengths a person can have.</p><p>Because of you, I became a kinder person.</p><p>Thank you for showing me what kindness truly looks like.</p>"
+                },
+                {
+                    title: "Laughter",
+                    text: "<p>I don't think there was a single day where we didn't laugh.</p><p>Sometimes it was because of something important.<br>Sometimes because of something completely ridiculous.</p><p>Somehow...<br>Every ordinary moment became unforgettable simply because you were in it.</p><p>Your laugh had a way of making the whole world feel lighter.</p><p>It reminded me that happiness doesn't always arrive through big moments.<br>Sometimes it arrives through the sound of someone you love laughing beside you.</p>"
+                },
+                {
+                    title: "Your Heart",
+                    text: "<p>One thing I always admired about you was how much you cared.</p><p>Whether it was helping me in Genshin Impact...<br>Checking if I had eaten...<br>Making sure I wasn't ending the day feeling lonely...<br>Or simply asking,<br>\"Are you okay?\"</p><p>You always tried.</p><p>Your determination wasn't loud.<br>It lived quietly inside the way you loved people.</p><p>That is something I will always admire about you.</p>"
+                },
+                {
+                    title: "Dreams We Shared",
+                    text: "<p>Somewhere along the journey...<br>Your dreams quietly became my dreams.</p><p>A little family.<br>A son.<br>A daughter.<br>A Skyline parked outside.<br>A peaceful farm.</p><p>Weekend shopping together.<br>Eating the meals you wanted to cook.<br>Growing older while creating countless ordinary little memories.</p><p>Dreams become beautiful because we imagine them together.</p><p>Thank you for sharing yours with me.</p>"
+                },
+                {
+                    title: "Curiosity",
+                    text: "<p>One of my favourite things about you was your curiosity.</p><p>Every time you wanted to understand something...<br>You came to me.<br>You asked questions.<br>You listened.</p><p>Somehow...<br>You always made me feel like I knew everything...<br>Even though I definitely didn't.</p><p>Thank you for making me feel trusted.<br>Those little conversations are memories I'll always smile about.</p>"
+                },
+                {
+                    title: "September 2022",
+                    text: "<p>I'll never forget September.<br>I proposed to you.</p><p>Two days later...<br>You looked at me and said,<br>\"The things you said... anyone else could say those. That doesn't mean anyone can have me.\"</p><p>I was completely speechless.</p><p>Then...<br>Just a little while later...<br>You were watching The Notebook.</p><p>You looked at me...<br>and quietly said,<br>\"Never die on me.\"</p><p>Looking back...<br>I think that moment captured us perfectly.</p><p>Honest.<br>Emotional.<br>Imperfect.<br>Yet beautifully real.</p>"
+                },
+                {
+                    title: "Finding Our Way",
+                    text: "<p>We lost each other more than once.</p><p>There were days when it felt like we had reached the end.<br>Yet somehow...<br>Life always found a way to bring us back into each other's world.</p><p>Looking back now, I don't remember those moments because they were painful.<br>I remember them because every time we found our way back, it reminded me how much we valued what we had.</p><p>For a long time...<br>Home wasn't simply a place.<br>It was wherever we were together.</p><p>Thank you for every moment we found our way back to one another.</p>"
+                },
+                {
+                    title: "What You Taught Me",
+                    text: "<p>Before you,<br>I thought strength meant never showing emotion.</p><p>You taught me something far more valuable.</p><p>You taught me patience.<br>You taught me kindness.<br>You taught me that giving without expecting anything in return is one of the most beautiful things a person can do.</p><p>Those lessons have become part of who I am.<br>They will stay with me for the rest of my life.</p><p>Thank you for changing me in ways you may never fully realize.</p>"
+                },
+                {
+                    title: "My Wish For You",
+                    text: "<p>More than anything...<br>I hope life is gentle with you.</p><p>I hope your smile never loses its warmth.<br>I hope your laughter fills every room you walk into.<br>I hope every dream you carry slowly becomes reality.<br>I hope you always believe in yourself, even on difficult days.</p><p>And if I'm allowed one selfish wish...<br>It's that somewhere, somehow...<br>A part of me will always smile whenever I think of you smiling.</p>"
+                },
+                {
+                    title: "Every Morning",
+                    text: "<p>Some of my favourite memories weren't grand adventures.<br>They were ordinary mornings.</p><p>Waking up to your message.<br>Hearing your voice.<br>Seeing your face.</p><p>Somehow...<br>Every day felt a little easier simply because you were there.</p><p>Those mornings reminded me that happiness isn't always something extraordinary.</p><p>Sometimes...<br>Happiness is simply having someone to say,<br>\"Good morning.\"</p>"
+                },
+                {
+                    title: "Thank You",
+                    text: "<p>Life introduces us to many people.<br>Only a few quietly change who we become.</p><p>You were one of those people.</p><p>Thank you...<br>For every conversation.<br>Every laugh.<br>Every lesson.<br>Every adventure.<br>Every difficult day we survived together.<br>Every ordinary day that somehow became extraordinary.</p><p>No matter where life takes us,<br>I'll always be grateful that our paths crossed.<br>You will forever be one of the brightest chapters of my life.</p>"
+                },
+                {
+                    title: "Happy Birthday",
+                    text: "<p>Happy Birthday, Charli. ❤️</p><p>Today isn't about the past.<br>It's about celebrating you.</p><p>The person who made people laugh without trying.<br>The person whose kindness made others feel safe.<br>The person whose curiosity made every conversation interesting.<br>The person who could make ordinary moments feel unforgettable.</p><p>I genuinely hope this year brings you everything you've been working toward.</p><p>I hope your studies go well.<br>I hope you achieve every goal you set for yourself.<br>I hope life rewards your determination with opportunities that make you proud.</p><p>Keep being kind.<br>Keep smiling.<br>Keep believing in yourself, even on the days when it's difficult.</p><p>The world is a better place because someone like you exists in it.</p><p>Thank you for every memory.</p><p>Happy Birthday.<br>I hope today is as wonderful as you are.</p><p>✨</p>"
+                }
+            ];
 
+            let currentMemoryIndex = 0;
+            let isConstellationComplete = false;
+            let interactable = false; 
+
+            const titleMain = document.getElementById('title-main');
+            const titleSub = document.getElementById('title-sub');
+            const btnLookup = document.getElementById('btn-lookup');
+            const openingScreen = document.getElementById('opening-screen');
+            const canvas = document.getElementById('sky');
+            const ctx = canvas.getContext('2d');
+            const moon = document.getElementById('moon');
+            const cinematicText = document.getElementById('cinematic-text');
+            const textDisplay = document.getElementById('text-display');
+            const memoryOverlay = document.getElementById('memory-overlay');
+            const memoryTitle = document.getElementById('memory-title');
+            const memoryBody = document.getElementById('memory-body');
+            const btnContinue = document.getElementById('btn-continue');
+            const btnFinish = document.getElementById('btn-finish');
+            const credits = document.getElementById('credits');
+            const btnReplay = document.getElementById('btn-replay');
+
+            const secretOverlay = document.getElementById('secret-overlay');
+            const btnSecretClose = document.getElementById('btn-secret-close');
+            let moonClicks = 0;
+            let moonClickTimer = null;
+
+            let width, height;
+            let backgroundStars = [];
+            let fireflies = [];
+            let shootingStars = [];
+            let memoryStars = []; 
+
+            const starPositions = [
+                { x: 0.15, y: 0.30 }, { x: 0.35, y: 0.20 }, { x: 0.55, y: 0.25 },
+                { x: 0.75, y: 0.15 }, { x: 0.85, y: 0.40 }, { x: 0.65, y: 0.50 },
+                { x: 0.45, y: 0.60 }, { x: 0.25, y: 0.55 }, { x: 0.15, y: 0.75 },
+                { x: 0.35, y: 0.85 }, { x: 0.60, y: 0.80 }, { x: 0.80, y: 0.70 }
+            ];
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                updateMemoryStarPositions();
+            }
+            window.addEventListener('resize', resize);
+
+            class BackgroundStar {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.size = Math.random() * 1.5;
+                    this.baseAlpha = Math.random() * 0.5 + 0.1;
+                    this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+                    this.angle = Math.random() * Math.PI * 2;
+                }
+                draw() {
+                    this.angle += this.twinkleSpeed;
+                    const alpha = this.baseAlpha + Math.sin(this.angle) * 0.2;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, alpha)})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            class Firefly {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height + height * 0.2; 
+                    this.size = Math.random() * 2 + 1;
+                    this.speedX = (Math.random() - 0.5) * 0.3;
+                    this.s
