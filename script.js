@@ -19,21 +19,18 @@ window.addEventListener('load', () => {
     let isConstellationComplete = false;
     let interactable = false;
     
-    // Audio Setup
+    // Improved Audio Setup
     const bgMusic = document.getElementById('bg-music');
-    bgMusic.volume = 0.3; // Gentle, soothing volume
+    bgMusic.volume = 0.3; 
     const musicToggle = document.getElementById('music-toggle');
-    let isMusicPlaying = false;
 
     musicToggle.addEventListener('click', () => {
-        if (isMusicPlaying) {
-            bgMusic.pause();
-            musicToggle.innerText = '🔇 Muted';
-            isMusicPlaying = false;
-        } else {
+        if (bgMusic.paused) {
             bgMusic.play();
-            musicToggle.innerText = '🎵 Playing';
-            isMusicPlaying = true;
+            musicToggle.innerText = '🎵 Mute';
+        } else {
+            bgMusic.pause();
+            musicToggle.innerText = '🔇 Unmute';
         }
     });
     
@@ -62,7 +59,6 @@ window.addEventListener('load', () => {
     }
     window.addEventListener('resize', resize);
 
-    // Ghibli Painted Clouds
     class PaintedCloud {
         constructor() {
             this.x = Math.random() * width;
@@ -101,14 +97,14 @@ window.addEventListener('load', () => {
         constructor() {
             this.x = Math.random() * window.innerWidth;
             this.y = Math.random() * window.innerHeight;
-            this.size = Math.random() * 2.5 + 1; // Slightly larger for Ghibli feel
+            this.size = Math.random() * 2.5 + 1; 
             this.life = Math.random() * 10;
         }
         draw() {
             this.y -= 0.15;
             if (this.y < -10) this.y = height + 10;
             this.life += 0.02;
-            ctx.fillStyle = `rgba(238, 245, 154, ${(Math.sin(this.life)+1)/2 * 0.7})`; // Warmer green/yellow
+            ctx.fillStyle = `rgba(238, 245, 154, ${(Math.sin(this.life)+1)/2 * 0.7})`; 
             ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
         }
     }
@@ -148,7 +144,7 @@ window.addEventListener('load', () => {
                 let targetSize = 6 + Math.sin(this.pulse) * 2;
                 s = targetSize * this.introProgress;
                 a = this.introProgress;
-                glow = 20 * this.introProgress; // Stronger glow
+                glow = 20 * this.introProgress; 
             } else if(this.state === 'completed') {
                 s = 4;
                 a = 0.9;
@@ -157,7 +153,7 @@ window.addEventListener('load', () => {
             
             ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
             ctx.shadowBlur = glow;
-            ctx.shadowColor = 'rgba(253, 228, 147, 0.9)'; // Golden Ghibli glow
+            ctx.shadowColor = 'rgba(253, 228, 147, 0.9)'; 
             ctx.beginPath(); ctx.arc(this.x, this.y, s, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
         }
@@ -195,14 +191,11 @@ window.addEventListener('load', () => {
         openingScreen.style.opacity = '0';
         moon.classList.add('glowing');
         
-        // Start Audio and show toggle button
+        // Smarter Audio handling for strict mobile browsers
         bgMusic.play().then(() => {
-            isMusicPlaying = true;
-            musicToggle.innerText = '🎵 Playing';
+            musicToggle.innerText = '🎵 Mute';
         }).catch(() => {
-            // Browsers block autoplay sometimes, so it gracefully defaults to muted
-            isMusicPlaying = false;
-            musicToggle.innerText = '🔇 Muted';
+            musicToggle.innerText = '🔇 Tap to Unmute';
         });
         musicToggle.classList.remove('hidden');
 
@@ -210,7 +203,6 @@ window.addEventListener('load', () => {
             openingScreen.classList.add('hidden');
             memoryStars[0].state = 'active'; 
             
-            // Show instruction to tap brightest star
             instructionScreen.classList.remove('hidden');
             instructionText.classList.add('fade-in');
             
@@ -291,7 +283,6 @@ window.addEventListener('load', () => {
         setTimeout(() => {
             document.getElementById('credits').classList.remove('hidden');
             
-            // THE FIX: Explicitly adding the fade-in class to the text
             setTimeout(() => {
                 moon.classList.add('hint-active');
                 document.getElementById('moon-hint').classList.add('fade-in');
@@ -302,8 +293,17 @@ window.addEventListener('load', () => {
 
     document.getElementById('btn-replay').addEventListener('click', () => location.reload());
 
+    // THE FIX: Single tap opens the secret once the hint is on screen!
     let moonClicks = 0, moonTimer;
     moon.addEventListener('click', () => {
+        
+        // If the final hint is visible, it only takes ONE click to open the secret
+        if (document.getElementById('moon-hint').classList.contains('fade-in')) {
+            openSecret();
+            return;
+        }
+
+        // Before the hint appears, it still requires 7 secret taps
         moonClicks++;
         clearTimeout(moonTimer);
         moonTimer = setTimeout(() => moonClicks = 0, 1500);
