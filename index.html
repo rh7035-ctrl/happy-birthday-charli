@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday, Charli ✨</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Elegant Serif for titles, clean Sans-Serif for readability -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="universe">
+        <!-- Interactive Canvas for Stars, Fireflies, and Constellation -->
+        <canvas id="sky"></canvas>
+        
+        <!-- The Moon (Double functions as the Easter Egg trigger) -->
+        <div id="moon"></div>
+
+        <!-- Opening Sequence -->
+        <div id="opening-screen" class="screen">
+            <div class="titles">
+                <h1 id="title-main" class="fade-element">Happy Birthday, Charli ✨</h1>
+                <h2 id="title-sub" class="fade-element">Some memories never disappear.<br>They simply wait among the stars.</h2>
+            </div>
+            <button id="btn-lookup" class="glow-btn fade-element">✨ Look Up</button>
+        </div>
+
+        <!-- Midway & Final Cinematic Text -->
+        <div id="cinematic-text" class="screen pointer-none hidden">
+            <h2 id="text-display"></h2>
+        </div>
+
+        <!-- Memory Card Container -->
+        <div id="memory-overlay" class="hidden">
+            <div id="memory-card" class="glass-card">
+                <h3 id="memory-title">⭐ Title</h3>
+                <div id="memory-body"></div>
+                <button id="btn-continue" class="glow-btn glass-btn">Continue &rarr;</button>
+                <button id="btn-finish" class="glow-btn glass-btn hidden">Watch the Sky</button>
+            </div>
+        </div>
+
+        <!-- Secret Easter Egg -->
+        <div id="secret-overlay" class="hidden">
+            <div class="paper-card">
+                <h3>🌙 A Little Secret</h3>
+                <div id="secret-body">
+                    <p>If you've found this...<br>Then you've discovered the only hidden page in this little universe.</p>
+                    <p>I didn't want this to be part of your birthday because today is about celebrating you.</p>
+                    <p>But I wanted to leave one tiny wish somewhere among the stars.</p>
+                    <p>Next year you'll turn twenty-one.<br>Maybe life will take us in completely different directions.<br>Maybe it won't.<br>None of us can really know.</p>
+                    <p>But if, somehow, life lets our paths cross again...<br>I'd still love to celebrate your twenty-first birthday with you.</p>
+                    <p>Maybe we'd spend the day exploring somewhere new.<br>Maybe we'd laugh over terrible food.<br>Maybe we'd go shopping.<br>Maybe we'd simply watch the sunset and talk for hours.</p>
+                    <p>And if life has different plans...<br>Then that's okay too.</p>
+                    <p>I hope your 20th birthday is filled with people who make you smile, wherever you are.</p>
+                    <p>Some wishes don't need to become plans.<br>They're simply beautiful because they exist.</p>
+                    <p class="center-text">✨</p>
+                </div>
+                <button id="btn-secret-close" class="glow-btn glass-btn dark-text">Return to the Sky</button>
+            </div>
+        </div>
+
+        <!-- Final Credits -->
+        <div id="credits" class="screen pointer-none hidden">
+            <p>Made with love.<br>Happy Birthday. ✨</p>
+            <button id="btn-replay" class="glow-btn glass-btn pointer-auto mt-4">Experience Again</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
